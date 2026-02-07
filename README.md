@@ -27,18 +27,28 @@ pip install -r requirements.txt
 
 ## Usage
 
-### Method 1: Standalone Executable (Recommended)
-1. Download `BioData v1.0.exe`.
-2. Place it in your project folder (or anywhere).
-3. Double-click to run. No Python installation required.
-The wizard will:
-1.  Auto-detect data files (`.xlsx`, `.csv`).
-2.  Provide a smart preview of columns (ID, Name, Type, Sample).
-3.  Guide you through variable mapping with type safety checks.
-4.  Allow you to select data transformations (Log2, Log10, Ln).
-5.  Generate publication-ready figures.
+### Method 1: The "Wizard" Mode (Recommended)
+Simply run the executable or script without arguments. The tool will enter **Interactive Mode**:
 
-### 2. Command Line Interface (CLI)
+1. **Auto-Scan**: It detects all `.xlsx` and `.csv` files in the folder.
+2. **Smart Preview**: Shows you a table of columns with their data types (so you don't mix up Text vs Numbers).
+3. **Safety Checks**: Prevents you from selecting invalid columns for plotting.
+4. **Auto-Plot**: Generates PDF/PNG and Statistical Reports immediately.
+
+```bash
+# Run the python script
+python main.py
+
+# OR run the standalone executable
+./BioData_v1.0.exe
+```
+
+### Method 2: Command Line Arguments
+(Optional) You can still pass arguments if you want to automate the process:
+
+```bash
+python main.py --input data.xlsx
+```
 Run the analysis by providing a configuration file and a data source:
 ```bash
 python main.py --config path/to/experiment.bd --input path/to/data.xlsx
@@ -92,11 +102,10 @@ BioDiagnosis Core 是一个高精度的生物数据分析与可视化引擎。�
 
 ## 核心特性
 
-- **智能核心 (Smart Core)**: 自动检测宽/长数据格式，自动融合 (Melt)，并支持带单位的数据（如 "10mg", "5ug"），通过智能正则提取数值。
-- **交互式向导 (Interactive Wizard)**: 即使没有配置文件，CLI 向导也会引导您完成图形选择、变量映射，并未您提供**智能数据预览**和**类型安全保护**。
-- **微型 DSL**: 使用简单的配置文件 (`.bd`) 即可实现高度可复现的分析。
-- **高精度统计**: 导出多 Sheet 的 Excel 报告，包含保留3位小数的数据和保留4位小数的 P值。
-- **顶级可视化**: 生成符合 Nature 标准的箱线图、散点图、火山图和热图，自动标注误差棒和显著性符号。
+- **Nature 标准可视化**: 自动生成矢量 PDF 格式的散点图、箱线图、火山图和热图。
+- **智能交互向导**: 无需编写代码。CLI 向导引导您完成数据选择，并提供 **类型安全保护** 和 **数据预览** 以防止错误。
+- **自动化统计**: 内置 Mann-Whitney U 检验和 T 检验，自动检测对照组。
+- **数据卫生**: 严格分离原始数据、统计结果和可视化产物。
 
 ## 快速开始
 
@@ -111,24 +120,27 @@ pip install -r requirements.txt
 
 ## 使用方法
 
-### 1. 交互式向导 (推荐)
-直接运行程序，无需参数即可启动向导：
-```bash
-python main.py
-# 或者运行打包后的程序:
-BioData v1.0.exe
-```
-向导将：
-1.  自动扫描 `.xlsx` / `.csv` 数据文件。
-2.  提供清晰的列数据预览 (ID, 名称, 类型, 样本值)。
-3.  引导您进行变量映射，并实时检查类型错误（防止误选文本列）。
-4.  允许您选择数据转换模型 (Log2, Log10, Ln)。
-5.  一键生成出版级图表。
+### 方法 1: "向导" 模式 (推荐)
+直接运行可执行文件或脚本，无需任何参数。工具将进入 **交互模式**:
 
-### 2. 命令行模式 (CLI)
-通过指定配置文件和数据源运行：
+1. **自动扫描**: 自动检测文件夹中的所有 `.xlsx` 和 `.csv` 文件。
+2. **智能预览**: 显示包含数据类型的列宽表（防止混淆文本和数字）。
+3. **安全检查**: 防止您选择无效的列进行绘图。
+4. **自动绘图**: 立即生成 PDF/PNG 和统计报告。
+
 ```bash
-python main.py --config boxplot.bd --input data.xlsx
+# 运行 Python 脚本
+python main.py
+
+# 或者运行独立可执行文件
+./BioData_v1.0.exe
+```
+
+### 方法 2: 命令行参数
+(可选) 如果您想自动化该过程，仍然可以传递参数：
+
+```bash
+python main.py --input data.xlsx
 ```
 
 ### 3. 配置文件 (`.bd`) 示例
