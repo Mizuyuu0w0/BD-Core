@@ -51,7 +51,7 @@ class NatureStyler:
             'savefig.dpi': 300,
             'savefig.bbox': 'tight',     # No whitespace
             'savefig.pad_inches': 0.1,
-            'pdf.fonttype': 42           # Editable Text in Illustrator
+            'pdf.fonttype': 3            # Type 3 (Standard) to avoid TTF subsetting corruption
         })
 
         logger.debug("Style constraints applied successfully.")

@@ -79,7 +79,9 @@ class BasePlugin(ABC):
         elif 'volcano' in g_type.lower():
              name = f"{g_type} Graph ({clean(ylabel)} vs {clean(xlabel)})"
         elif 'heatmap' in g_type.lower():
-             name = f"{g_type} Graph (Correlation Matrix)"
+             subtype = self.config.get('subtype', self.config.get('heatmap_mode', 'correlation'))
+             desc = "Expression Heatmap" if subtype == 'expression' else "Correlation Matrix"
+             name = f"{g_type} Graph ({desc})"
         else:
              name = f"BD Result {self.am.run_id}"
 
@@ -131,10 +133,21 @@ class BasePlugin(ABC):
         }
         
         # Sheet 2: Hypothesis Testing (P-value etc.)
-        if self.stats_results:
-            import pandas as pd
+        # Sheet 2: Hypothesis Testing (P-value etc.)
+        # [Fix] Handle if stats_results is a DataFrame (Matrix) or Dict
+        has_stats = False
+        import pandas as pd # Import before use
+        
+        if isinstance(self.stats_results, pd.DataFrame):
+             has_stats = not self.stats_results.empty
+        else:
+             has_stats = bool(self.stats_results)
+
+        if has_stats:
             if isinstance(self.stats_results, list):
                 stats_df = pd.DataFrame(self.stats_results)
+            elif isinstance(self.stats_results, pd.DataFrame):
+                 stats_df = self.stats_results
             else:
                 stats_df = pd.DataFrame([self.stats_results])
             
@@ -166,17 +179,110 @@ class BasePlugin(ABC):
                  desc.index.name = xlabel
                  data_packet["Descriptive Stats"] = round_floats(desc.reset_index(), 3)
             else:
-                # Global Stats (for Scatter X/Y)
+                # Global Stats
+                # If 'x'/'y' exist (Scatter/Volcano), prioritize them.
+                # If not (Heatmap), describe ALL numeric columns.
                 cols = [c for c in self.df.columns if c in ['x', 'y', 'value']]
-                if cols:
-                    desc = self.df[cols].describe()
-                    # Rename columns in the result: x->xlabel, y->ylabel
-                    trans_map = {'x':xlabel, 'y':ylabel}
-                    desc.rename(columns=trans_map,inplace=True)
+                if not cols: 
+                    # Fallback for Heatmap or other multivariate plots
+                    # Select only numeric columns to avoid errors
+                    numeric_df = self.df.select_dtypes(include=['number'])
+                    if not numeric_df.empty:
+                        desc = numeric_df.describe().T
+                        desc.index.name = "Variable"
+                        data_packet["Descriptive Stats"] = round_floats(desc.reset_index(), 3)
+                else:
+                    # Standard X/Y Stats
+                    desc = self.df[cols].describe().T
+                    desc.index.name = "Variable"
+                    # Transpose makes x,y the rows.
                     data_packet["Descriptive Stats"] = round_floats(desc.reset_index(), 3)
                     
             if stats_obj is not None:
                 data_packet["Descriptive Stats"] = round_floats(stats_obj, 3)
+
+            # [Publication Engine] Three-Line Table (Mean ± SEM)
+            # We derive this from the descriptive stats we just calculated.
+            if "Descriptive Stats" in data_packet:
+                 ds = data_packet["Descriptive Stats"].copy()
+                 
+                 # Ensure we have mean, std, count (sometimes 'count' is 'N')
+                 # Describe (pandas) produces: count, mean, std...
+                 # We need to check columns. If grouped, index might be involved.
+                 
+                 # Normalizing column names to lowercase for checking
+                 ds.columns = [c.lower() if isinstance(c, str) else c for c in ds.columns]
+                 
+                 # Calculate SEM = std / sqrt(count)
+                 if 'std' in ds.columns and 'count' in ds.columns:
+                     try:
+                        import numpy as np
+                        ds['sem'] = ds['std'] / np.sqrt(ds['count'])
+                        
+                        # Format "Mean ± SEM"
+                        # Use .apply for row-wise formatting
+                        def fmt_mean_sem(row):
+                            m = row.get('mean', 0)
+                            s = row.get('sem', 0)
+                            return f"{m:.2f} ± {s:.2f}"
+                        
+                        ds['Mean ± SEM'] = ds.apply(fmt_mean_sem, axis=1)
+                        
+                        # Clean up for report
+                        # Keep Index/Group columns and the new formatted column
+                        keep_cols = [xlabel] if xlabel and xlabel.lower() in ds.columns else []
+                        if 'x' in ds.columns: keep_cols.append('x')
+                        if 'index' in ds.columns: keep_cols.append('index')
+                        
+                        keep_cols.append('Mean ± SEM')
+                        keep_cols.extend(['count', 'mean', 'std', 'sem']) # Keep raw for validation
+                        
+                        # Filter existing keys
+                        final_cols = [c for c in keep_cols if c in ds.columns]
+                        report_df = ds[final_cols].copy()
+                        
+                        # [P-Value Starring]
+                        # If Hypothesis Test exists, try to merge or list p-values
+                        if "Hypothesis Test" in data_packet:
+                            ht = data_packet["Hypothesis Test"]
+                            
+                            # Case A: Matrix (Correlation P-values)
+                            # Check if index and columns match and are symmetric-ish
+                            if ht.shape[0] == ht.shape[1] and ht.shape[0] > 1:
+                                # Start logic for Matrix
+                                def get_stars(p):
+                                    if pd.isna(p): return ""
+                                    if p < 0.001: return "***"
+                                    if p < 0.01: return "**"
+                                    if p < 0.05: return "*"
+                                    return "ns"
+                                
+                                # Apply to entire dataframe
+                                star_matrix = ht.map(get_stars)
+                                # Save as separate sheet or append? 
+                                # Let's save a new sheet "Significance Matrix"
+                                data_packet["Significance Matrix"] = star_matrix
+                            
+                            # Case B: Table (Comparison | P-Value)
+                            else:
+                                # Naive check: look for 'p-value' or 'p_value' column
+                                p_col = next((c for c in ht.columns if 'p' in c.lower() and 'val' in c.lower()), None)
+                                if p_col:
+                                    # Start logic
+                                    def get_stars_row(p):
+                                        if pd.isna(p): return "ns"
+                                        if p < 0.001: return "***"
+                                        if p < 0.01: return "**"
+                                        if p < 0.05: return "*"
+                                        return "ns"
+                                    
+                                    # Add stars column to Hypothesis Test DataFrame for reference
+                                    ht['Significance'] = ht[p_col].apply(get_stars_row)
+                                    data_packet["Hypothesis Test"] = ht # Update packet
+                        
+                        data_packet["Publication Report"] = report_df
+                     except Exception as e:
+                        logger.warning(f"Failed to generate Three-Line Table: {e}")
 
         except Exception as e:
             logger.warning(f"Descriptive stats calculation failed: {e}")
@@ -186,34 +292,70 @@ class BasePlugin(ABC):
 
     def _stamp_audit(self):
         """
-        Internal: Add RunID watermark to bottom right.
-        Safety/Liability feature.
+        Internal: Save RunID and Metadata to summary.txt instead of Watermark.
+        [Nature-Standard Hygiene] No text on image.
         """
+        try:
+             # Create summary.txt content
+             lines = [
+                 "========================================",
+                 f" BioData Analysis Report (v1.2)",
+                 "========================================",
+                 f"Run ID       : {self.am.run_id}",
+                 f"Graph Type   : {self.config.get('graph', 'Unknown')}",
+                 f"Subtype      : {self.config.get('subtype', 'Default')}",
+                 f"Timestamp    : {self.am.timestamp}",
+                 "----------------------------------------",
+                 "Configuration Snapshot:",
+                 str(self.config),
+                 "----------------------------------------",
+                 "Generated by BD-Core (github.com/Mizuyuu0w0/BD-Core)"
+             ]
+             
+             # Save to sandbox using ArtifactManager
+             # We reuse save_data logic or just write file directly if AM exposes path
+             # AM.save_data typically saves structured data (Excel/CSV/JSON)
+             # We'll use a raw write via the sandbox path if available, or ask AM to do it.
+             # Since AM constructs paths, let's create a simple text artifact.
+             
+             # Using a small hack: pass a dict to save_data? No, save_data handles dicts as JSON/Excel.
+             # Let's inspect AM later. For now, we can try to save it as a text file if AM supports checks.
+             
+             # Actually, let's just write to the sandbox root.
+             # self.am.sandbox_dir should be available.
+             import os
+             summary_path = os.path.join(self.am.sandbox_dir, "summary.txt")
+             with open(summary_path, "w", encoding='utf-8') as f:
+                 f.write("\n".join(lines))
+                 
+             logger.info(f"Metadata saved to {summary_path}")
+                 
+        except Exception as e:
+            logger.warning(f"Failed to save summary.txt: {e}")
+
+        # [Restored] Visual Watermark (User Request)
+        # We keep the summary.txt for detailed info, but put back the RunID on the plot.
+        # Make it small and unobtrusive.
         run_id = self.am.run_id
         github_url = "github.com/Mizuyuu0w0/BD-Core"
+        text = f"RunID: {run_id} | BD-Core v1.2\n{github_url}"
         
-        # [Visual Logic] Smart Placement
-        # If Title exists -> Footer (Bottom-Right, Below Axis) to avoid top collision.
-        # If No Title -> Header (Top-Right, Inside Axis) for better visibility.
+        # Smart Placement: Figure Bottom-Right (Global)
+        # 1. Reserve footer space (Shift plots up)
+        # This ensures the `0.01` y-coordinate is in empty white space, not over axes/labels.
+        try:
+            self.fig.subplots_adjust(bottom=0.15)
+        except Exception:
+            # Clustermap or complex layouts might ignore this or warn.
+            # For Clustermap, we might need to rely on its internal layout or accept strict borders.
+            # But usually fig.subplots_adjust works on the global figure figure.
+            pass
+
+        # 2. Place Text in the reserved footer
+        self.fig.text(0.99, 0.01, text, 
+                     ha='right', va='bottom', 
+                     fontsize=5, color='grey', alpha=0.6)
         
-        has_title = bool(self.config.get('title'))
-        
-        if has_title:
-             # Footer Mode
-             # Use \n for two lines as requested
-             text = f"RunID: {run_id} | BD-Core v1.0\n{github_url}"
-             self.ax.text(1.0, -0.25, text, 
-                          transform=self.ax.transAxes,
-                          ha='right', va='top', 
-                          fontsize=6, color='grey', alpha=0.8)
-        else:
-             # Header Mode (Original Top-Right)
-             text = f"RunID: {run_id} | BD-Core v1.0\n{github_url}"
-             props = dict(boxstyle='round', facecolor='white', alpha=0.8, linewidth=0)
-             self.ax.text(0.99, 0.99, text, 
-                          transform=self.ax.transAxes,
-                          ha='right', va='top', 
-                          fontsize=6, color='grey', bbox=props)
 
     def _apply_mapping(self):
         """

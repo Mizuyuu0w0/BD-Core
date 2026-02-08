@@ -52,6 +52,8 @@ coverage.xml
 # Exclude result folders (but keep test data if needed)
 Results/
 test/
+test_output*/
+
 # Exclude build artifacts
 build/
 dist/

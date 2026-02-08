@@ -42,7 +42,9 @@ class ArtifactManager:
              folder_name = f"{g_type} Graph ({clean(ylabel)} vs {clean(xlabel)}) [{self.timestamp}]"
         elif 'heatmap' in g_type.lower():
              # Heatmap uses correlation or generic title
-             folder_name = f"{g_type} Graph (Correlation Matrix) [{self.timestamp}]"
+             subtype = self.config.get('subtype', self.config.get('heatmap_mode', 'correlation'))
+             desc = "Expression Heatmap" if subtype == 'expression' else "Correlation Matrix"
+             folder_name = f"{g_type} Graph ({desc}) [{self.timestamp}]"
         else:
              folder_name = f"BD Result [{self.timestamp}] {self.run_id}"
 

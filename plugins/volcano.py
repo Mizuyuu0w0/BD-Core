@@ -13,7 +13,7 @@ class VolcanoPlugin(BasePlugin):
         # 火山图至少需要两列数据：x (FC), y (P)
         # BasePlugin 的 _apply_mapping 已经把它们重命名为 'x' 和 'y' 了
         if 'x' not in self.df.columns or 'y' not in self.df.columns:
-            raise ValueError("Volcano Plot reuires 'Independent Variable (FC)' and 'Dependent Variable (P-value)'.")
+            raise ValueError("Volcano Plot requires 'Independent Variable (FC)' and 'Dependent Variable (P-value)'.")
 
     def compute_stats(self):
         # 智能预处理：如果 Y 轴看起来像 P-value (0~1之间)，自动转为 -log10

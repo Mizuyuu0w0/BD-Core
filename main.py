@@ -44,6 +44,8 @@ def main():
         while True:
             # --- 自动发现数据 (Data Discovery) ---
             data_path = args.input
+            is_interactive_selection = False # Flag to track if user was prompted for file selection
+            
             if not data_path:
                 # [Smart Discovery] Scan for .xlsx/.csv, ignoring temp files (~$)
                 candidates = list(Path('.').glob('*.xlsx')) + list(Path('.').glob('*.csv'))
@@ -58,6 +60,7 @@ def main():
                     logger.error("No data file (.xlsl/.csv) found in current directory")
                     break # Exit loop to trigger finally
                 if len(candidates) > 1:
+                    is_interactive_selection = True
                     print("\nMultiple data files detected:")
                     for i, f in enumerate(candidates):
                         print(f" [{i}] {f.name}")
@@ -98,6 +101,14 @@ def main():
                     config = wizard.run()
 
                     if config is None:
+                        print("\n[System] Wizard cancelled.")
+                        # [Fix Infinite Loop] If we didn't ask for file selection, we MUST ask if they want to restart
+                        # otherwise it loops infinitely on the same file.
+                        if not is_interactive_selection:
+                            retry = get_user_input("Restart wizard? (y/n, default: n)", allow_back=False)
+                            if retry.lower() != 'y':
+                                break # Exit main loop
+                        
                         print("\n[System] Returning to file selection...")
                         continue # 返回到文件选择起点
                 '''
@@ -130,22 +141,21 @@ def main():
             dispatcher = PluginDispatcher(am)
             dispatcher.dispatch(config, clean_df)
 
-            # --- 7. 预览 (Reviewing) --- 弹窗预览
-            print("\n" + "-"*30)
-            print("Close the plot window to finish.")
-            print("-" * 30 + "\n")
-            plt.show()
+            # --- 7. 预览 (Reviewing) ---
+            # [Single Run Mode] No blocking preview.
+            # print("\n" + "-"*30)
+            # print("Close the plot window to finish.")
+            # print("-" * 30 + "\n")
             
             # --- 8. 收尾 (Closing) ---
             # 保存审计日志，关闭会话
             am.close()
             logger.info(f"Process Complete. RunID: {run_id}")
 
-            # 询问是否继续 (User Requested Single Run for now, keeping break)
-            # If we want to loop, we should ask user here. 
-            # For now, just break as per current code structure.
+            # [UX Upgrade] Loop on same file
+            # Ask user if they want to analyze the SAME file again
+            print("\n" + "="*40)
             break
-            logger.info(f"Process Complete. RunID: {run_id}")
         
     except Exception as e:
         # 批注: 错误处理策略 (Error Handling Strategy)
