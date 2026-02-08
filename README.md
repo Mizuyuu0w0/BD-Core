@@ -78,6 +78,10 @@ python build_exe.py
 ```
 This will generate `dist/BioData v1.0.exe`.
 
+## Known Bugs
+
+> ⚠️ **Heatmap Logic Issue**: The Heatmap data analysis and image generation logic has known issues. **Fix in progress.**
+
 ## License
 Internal BioDiagnosis Research Tool.
 
@@ -156,3 +160,7 @@ Results/Kinetics/Scatter Graph (...) [06022026_184037]/
 python build_exe.py
 ```
 生成文件位于 `dist/BioData v1.0.exe`。
+
+## 已知问题
+
+> ⚠️ **Heatmap 逻辑问题**: 热图的数据分析和图像生成逻辑存在已知问题，**正在修复中。**
