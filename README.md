@@ -53,16 +53,6 @@ python main.py --input data.xlsx
 ```
 
 
-### 3. Configuration (`.bd` file)
-Example configuration for a Scatter Plot:
-```text
-Graph: Scatter
-Independent Variable: {Time}
-Dependent Variable: {Concentration}
-XLabel: Time (Hours)
-YLabel: Concentration (uM)
-Output data: "Results/Kinetics"
-```
 
 ## Output Structure
 
@@ -142,16 +132,6 @@ python main.py
 python main.py --input data.xlsx
 ```
 
-### 3. 配置文件 (`.bd`) 示例
-生成散点图的配置：
-```text
-Graph: Scatter
-Independent Variable: {Time}
-Dependent Variable: {Concentration}
-XLabel: Time (Hours)
-YLabel: Concentration (uM)
-Output data: "Results/Kinetics"
-```
 
 ## 输出结构
 
