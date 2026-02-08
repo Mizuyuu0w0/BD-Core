@@ -61,3 +61,14 @@ dist/
 # Exclude Binaries
 *.exe
 *.pkg
+
+# Test Data & Scripts
+test_*.csv
+create_*_test.py
+
+# Generated Output Folders (Heatmap, Box, Scatter, etc.)
+*Graph*[[]*/
+Heatmap*/
+Box*/
+Scatter*/
+Volcano*/
