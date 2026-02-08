@@ -1,8 +1,10 @@
-# BioDiagnosis Core (BD-Core)
+# BioData Core (BD-Core)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![GitHub](https://img.shields.io/badge/GitHub-Repo-blue?logo=github)](https://github.com/Mizuyuu0w0/BD-Core)
 
-> **Current Version**: v1.0.0 (2025-02)is a high-precision biological data analysis and visualization engine. It automates the process of data sanitization, statistical hypothesis testing (T-test/ANOVA), and publication-quality (Nature style) graph generation.
+> **Current Version**: v1.0 (2025-02)
+
+BioData Core is a high-precision biological data analysis and visualization engine. It automates the process of data sanitization, statistical hypothesis testing (T-test/ANOVA), and publication-quality (Nature style) graph generation.
 
 **Current Version**: v1.0
 
@@ -40,7 +42,7 @@ Simply run the executable or script without arguments. The tool will enter **Int
 python main.py
 
 # OR run the standalone executable
-./BioData_v1.0.exe
+"./BioData v1.0.exe"
 ```
 
 ### Method 2: Command Line Arguments
@@ -49,10 +51,7 @@ python main.py
 ```bash
 python main.py --input data.xlsx
 ```
-Run the analysis by providing a configuration file and a data source:
-```bash
-python main.py --config path/to/experiment.bd --input path/to/data.xlsx
-```
+
 
 ### 3. Configuration (`.bd` file)
 Example configuration for a Scatter Plot:
@@ -94,9 +93,9 @@ Internal BioDiagnosis Research Tool.
 
 ---
 
-# BioDiagnosis Core (BD-Core) [中文版]
+# BioData Core (BD-Core) [中文版]
 
-BioDiagnosis Core 是一个高精度的生物数据分析与可视化引擎。它全自动完成了数据清洗、统计假设检验 (T-test/ANOVA) 以及出版级 (Nature 风格) 图表生成的全过程。
+BioData Core 是一个高精度的生物数据分析与可视化引擎。它全自动完成了数据清洗、统计假设检验 (T-test/ANOVA) 以及出版级 (Nature 风格) 图表生成的全过程。
 
 **当前版本**: v1.0
 
@@ -133,7 +132,7 @@ pip install -r requirements.txt
 python main.py
 
 # 或者运行独立可执行文件
-./BioData_v1.0.exe
+"./BioData v1.0.exe"
 ```
 
 ### 方法 2: 命令行参数
