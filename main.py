@@ -1,4 +1,5 @@
 import sys
+import os  # [Fix] Critical for CWD management
 import argparse
 import logging
 import json
@@ -33,6 +34,12 @@ def setup_args():
     return parser.parse_args()
 
 def main():
+    # [Fix] Force CWD to be the executable's directory
+    # This ensures "double-clicking" works on Mac/Windows by looking for files relative to the EXE, not the User Home.
+    if getattr(sys, 'frozen', False):
+        application_path = os.path.dirname(sys.executable)
+        os.chdir(application_path)
+
     args = setup_args()
     NatureStyler.apply()
     
@@ -119,7 +126,6 @@ def main():
                     config['_unsafe_flags'] = unsafe_flags
                     logger.warning(f"Unsafe Flags Injected: {unsafe_flags}")
                 '''
-             # [UX Fix] 自动修正 Y轴 标签以反映转换
             # [UX Fix] 自动修正 Y轴 标签以反映转换
             model = config.get('model','linear')
             if model != 'linear' and config.get('ylabel'):
