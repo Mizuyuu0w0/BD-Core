@@ -3,12 +3,14 @@ import os
 import shutil
 
 # Mac 版应用名称
-APP_NAME = "BioData_v1_0"
+APP_NAME = "BioData_v1_2"
 
 # 1. 清理环境
 print("Cleaning previous Mac build artifacts...")
 if os.path.exists('build'): shutil.rmtree('build')
 if os.path.exists('dist'): shutil.rmtree('dist')
+if os.path.exists(f"{APP_NAME}.spec"):
+    os.remove(f'{APP_NAME}.spec')
 
 print(f"Starting Mac build process for {APP_NAME}...")
 
@@ -17,7 +19,7 @@ PyInstaller.__main__.run([
     'main.py',
     f'--name={APP_NAME}',
     '--onefile',                     # 生成单执行文件
-    '--windowed',                    # Mac 专利：生成 .app 包，双击运行时不显示终端背景（可选）
+    '--console',                     # CLI Tool: Must rely on Terminal for input/output
     '--clean',
     '--noconfirm',
     
@@ -27,6 +29,7 @@ PyInstaller.__main__.run([
     '--hidden-import=scipy.spatial.transform._rotation_groups',
     '--hidden-import=pandas._libs.tslibs.base',
     '--hidden-import=openpyxl',
+    '--hidden-import=xlsxwriter',    # Excel Formatting dependency
     '--hidden-import=seaborn',
     '--hidden-import=matplotlib.backends.backend_tkagg',
     '--hidden-import=matplotlib.backends.backend_pdf',

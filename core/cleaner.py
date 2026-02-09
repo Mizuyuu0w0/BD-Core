@@ -66,6 +66,19 @@ class DataCleaner:
         if target_col and target_col in self.df.columns:
             logger.info(f'Targeting specifice column for transformation: {target_col}')
             self.df[target_col] = self.df[target_col].map(math_op)
+            
+            # [Fix] Rename column to match config['ylabel'] which has suffix
+            new_col_name = f"{target_col} ({model})"
+            self.df.rename(columns={target_col: new_col_name}, inplace=True)
+            
+            # Update mapping so downstream knows the new name is the target
+            # self.config['_mapping']['dependent_variable'] = new_col_name 
+            # ^ Not strictly creating a loop because main.py set the mapping to OLD name.
+            # But BasePlugin checks mapping first. 
+            # BasePlugin logic: target_y = mapping.get('dependent_variable')
+            # If we don't update this, BasePlugin looks for "Name", finds nothing (renamed).
+            # So we MUST update the mapping to the new name.
+            self.config['_mapping']['dependent_variable'] = new_col_name
         else:
             logger.warning('Global transformation applied (Risky).')
             # 对整个 DataFrame 应用转换（此时表头还没清洗，所以用 map）

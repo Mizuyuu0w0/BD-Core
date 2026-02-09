@@ -51,8 +51,10 @@ coverage.xml
 *.log
 # Exclude result folders (but keep test data if needed)
 Results/
-test/
-test_output*/
+# test/  <-- Un-ignore test folder to keep scripts
+test/test_output*/
+test/test_real_output*/
+test/test_summary_output*/
 
 # Exclude build artifacts
 build/

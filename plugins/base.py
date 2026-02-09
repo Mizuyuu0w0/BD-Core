@@ -364,8 +364,9 @@ class BasePlugin(ABC):
         Example: Independent Variable: {Time} -> Rename 'Time' to 'x'
         """
         mapping = self.config.get('_mapping', {})
-        if not mapping:
-            return
+        
+        # [Fix] Do NOT return early if mapping is empty. 
+        # We need to fall back to xlabel/ylabel logic below.
 
         # Helper: Try to find column with fuzzy matching (case-insensitive)
         def find_col(target):
@@ -379,22 +380,30 @@ class BasePlugin(ABC):
             return None
 
         # 1. Map Independent Variable -> x
-        if 'independent_variable' in mapping:
-            target = mapping['independent_variable']
-            found = find_col(target)
+        target_x = mapping.get('independent_variable')
+        if not target_x:
+            # Fallback: Check 'xlabel'
+            target_x = self.config.get('xlabel')
+        
+        if target_x:
+            found = find_col(target_x)
             if found:
-                logger.info(f"Mapping column '{found}' (target: {target}) -> 'x'")
+                logger.info(f"Mapping column '{found}' (target: {target_x}) -> 'x'")
                 self.df.rename(columns={found: 'x'}, inplace=True)
             else:
-                 logger.warning(f"DSL Mapping Failed: Column '{target}' not found.")
+                 logger.warning(f"Mapping Failed: Column '{target_x}' not found for X-axis.")
         
         # 2. Map Dependent Variable -> y
-        if 'dependent_variable' in mapping:
-            target = mapping['dependent_variable']
-            found = find_col(target)
+        target_y = mapping.get('dependent_variable')
+        if not target_y:
+            # Fallback: Check 'ylabel'
+            target_y = self.config.get('ylabel')
+
+        if target_y:
+            found = find_col(target_y)
             if found:
-                logger.info(f"Mapping column '{found}' (target: {target}) -> 'y'")
+                logger.info(f"Mapping column '{found}' (target: {target_y}) -> 'y'")
                 self.df.rename(columns={found: 'y'}, inplace=True)
             else:
-                 logger.warning(f"DSL Mapping Failed: Column '{target}' not found.")
+                 logger.warning(f"Mapping Failed: Column '{target_y}' not found for Y-axis.")
             

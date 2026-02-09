@@ -2,11 +2,11 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![GitHub](https://img.shields.io/badge/GitHub-Repo-blue?logo=github)](https://github.com/Mizuyuu0w0/BD-Core)
 
-> **Current Version**: v1.0 (2025-02)
+> **Current Version**: v1.2 (2026-02)
 
 BioData Core is a high-precision biological data analysis and visualization engine. It automates the process of data sanitization, statistical hypothesis testing (T-test/ANOVA), and publication-quality (Nature style) graph generation.
 
-**Current Version**: v1.0
+**Current Version**: v1.2
 
 ## Features
 
@@ -14,7 +14,11 @@ BioData Core is a high-precision biological data analysis and visualization engi
 - **Interactive Wizard**: A CLI-based wizard guides you through graph selection, variable mapping, and model transformation with **Smart Data Preview** and **Type Safety Guards**.
 - **Micro-DSL**: Simple configuration files (`.bd`) for high reproducibility.
 - **High-Precision Stats**: Multi-sheet Excel export with 3-decimal data and 4-decimal p-values.
-- **Visualization**: Nature-standard Boxplots, Scatter plots, Volcano plots, and Heatmaps with automated error bars and significance notations.
+- **Visualization**: Nature-standard plots with automated error bars and significance notations.
+    - **Boxplots**: Automatic T-test/ANOVA and significance annotation.
+    - **Scatter plots**: Linear regression with $R^2$ and P-value.
+    - **Volcano plots**: Differential expression analysis (-Log10 P-value vs Log2 FC).
+    - **Heatmaps**: Support for **Correlation Matrix** and **Expression Heatmap** (with Z-score normalization).
 
 ## Getting Started
 
@@ -42,7 +46,7 @@ Simply run the executable or script without arguments. The tool will enter **Int
 python main.py
 
 # OR run the standalone executable
-"./BioData v1.0.exe"
+"./BioData v1.2.exe"
 ```
 
 ### Method 2: Command Line Arguments
@@ -51,8 +55,6 @@ python main.py
 ```bash
 python main.py --input data.xlsx
 ```
-
-
 
 ## Output Structure
 
@@ -63,6 +65,7 @@ Results/Kinetics/Scatter Graph (Concentration (uM) against Time (Hours)) [060220
 ├── Scatter Graph (...).pdf         # Vector Image (Publication Ready)
 ├── Scatter Graph (...) Data.xlsx   # Full Report with Borders
 └── audit_log.json                  # Operation signatures for reproducibility
+└── summary.txt                     # Execution metadata & Config snapshot
 ```
 
 ### Excel Report Sheets:
@@ -76,11 +79,7 @@ To package the application as a standalone executable:
 ```bash
 python build_exe.py
 ```
-This will generate `dist/BioData v1.0.exe`.
-
-## Known Bugs
-
-> ⚠️ **Heatmap Logic Issue**: The Heatmap data analysis and image generation logic has known issues. **Fix in progress.**
+This will generate `BioData v1.2.exe` in the **Project Root**.
 
 ## License
 Internal BioDiagnosis Research Tool.
@@ -91,11 +90,15 @@ Internal BioDiagnosis Research Tool.
 
 BioData Core 是一个高精度的生物数据分析与可视化引擎。它全自动完成了数据清洗、统计假设检验 (T-test/ANOVA) 以及出版级 (Nature 风格) 图表生成的全过程。
 
-**当前版本**: v1.0
+**当前版本**: v1.2
 
 ## 核心特性
 
-- **Nature 标准可视化**: 自动生成矢量 PDF 格式的散点图、箱线图、火山图和热图。
+- **Nature 标准可视化**: 自动生成矢量 PDF 格式的图表。
+    - **箱线图 (Boxplot)**: 自动进行显著性标注。
+    - **散点图 (Scatter)**: 包含线性回归与相关性分析。
+    - **火山图 (Volcano)**: 差异表达分析可视化。
+    - **热图 (Heatmap)**: 支持 **相关性矩阵** 和 **表达量热图** (支持 Z-score 归一化)。
 - **智能交互向导**: 无需编写代码。CLI 向导引导您完成数据选择，并提供 **类型安全保护** 和 **数据预览** 以防止错误。
 - **自动化统计**: 内置 Mann-Whitney U 检验和 T 检验，自动检测对照组。
 - **数据卫生**: 严格分离原始数据、统计结果和可视化产物。
@@ -126,7 +129,7 @@ pip install -r requirements.txt
 python main.py
 
 # 或者运行独立可执行文件
-"./BioData v1.0.exe"
+"./BioData v1.2.exe"
 ```
 
 ### 方法 2: 命令行参数
@@ -135,7 +138,6 @@ python main.py
 ```bash
 python main.py --input data.xlsx
 ```
-
 
 ## 输出结构
 
@@ -146,6 +148,7 @@ Results/Kinetics/Scatter Graph (...) [06022026_184037]/
 ├── Scatter Graph (...).pdf         # 矢量图 (可直接投稿)
 ├── Scatter Graph (...) Data.xlsx   # 完整数据报告 (带边框格式)
 └── audit_log.json                  # 操作审计日志 (确保可复现性)
+└── summary.txt                     # 执行元数据与配置快照
 ```
 
 ### Excel 报告包含:
@@ -159,8 +162,4 @@ Results/Kinetics/Scatter Graph (...) [06022026_184037]/
 ```bash
 python build_exe.py
 ```
-生成文件位于 `dist/BioData v1.0.exe`。
-
-## 已知问题
-
-> ⚠️ **Heatmap 逻辑问题**: 热图的数据分析和图像生成逻辑存在已知问题，**正在修复中。**
+生成文件位于 **项目根目录** (`BioData v1.2.exe`)。

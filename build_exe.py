@@ -2,7 +2,7 @@ import PyInstaller.__main__
 import os
 import shutil
 
-APP_NAME = "BioData v1.0"
+APP_NAME = "BioData v1.2"
 
 # 1. 清理旧的构建环境 (防止缓存导致的怪异 bug)
 print("Cleaning previous build artifacts...")

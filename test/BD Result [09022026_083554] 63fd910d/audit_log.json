@@ -1,0 +1,11 @@
+{
+  "RunID": "63fd910d",
+  "Timestamp": "09022026_083554",
+  "OutputMode": "Default Descriptive Sandbox",
+  "Environment": "CLI",
+  "Operations": [
+    "08:35:54 - Artifact Saved: BD Result 63fd910d (PDF+PNG)",
+    "08:35:54 - Data Saved: BD Result 63fd910d Data.xlsx (Sheets: ['Data Analysis', 'Hypothesis Test', 'Descriptive Stats', 'Publication Report'])"
+  ],
+  "InputHash": "29e2b5337792bf89"
+}

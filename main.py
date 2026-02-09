@@ -120,9 +120,14 @@ def main():
                     logger.warning(f"Unsafe Flags Injected: {unsafe_flags}")
                 '''
              # [UX Fix] 自动修正 Y轴 标签以反映转换
+            # [UX Fix] 自动修正 Y轴 标签以反映转换
             model = config.get('model','linear')
             if model != 'linear' and config.get('ylabel'):
-                config['ylabel'] = f'{config['ylabel']} ({model})'
+                # [Critical Fix] Preserve original column name for Cleaner/Mapper
+                if '_mapping' not in config: config['_mapping'] = {}
+                config['_mapping']['dependent_variable'] = config['ylabel']
+                
+                config['ylabel'] = f"{config['ylabel']} ({model})"
 
             # --- 4. 清洗与转换 pipeline ---
             cleaner = DataCleaner(raw_df, config)
@@ -168,6 +173,14 @@ def main():
             print(json.dumps({"status":"error","message":str(e)}))
     
     finally:
+        # [Robustness] Ensure Audit Log is saved even if crash happens
+        # Check if 'am' exists in local scope and is open
+        if 'am' in locals() and hasattr(am, 'close'):
+            try:
+                am.close()
+            except:
+                pass
+
         # [EXE UX] Prevent terminal from closing immediately on error or exit
         if getattr(sys, 'frozen', False):
             print("\n" + "="*40)
