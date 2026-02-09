@@ -55,6 +55,7 @@ Results/
 test/test_output*/
 test/test_real_output*/
 test/test_summary_output*/
+test/BD Result*/
 
 # Exclude build artifacts
 build/
